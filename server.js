@@ -13,20 +13,10 @@ const app = express();
 
 // --- CORS PATCH: Allow frontend to access backend from any origin (for dev/deploy) ---
 // For production, restrict the origin array below to your frontend domains
-const allowedOrigins = [
-  'https://gittrailkridha.vercel.app', // Vercel frontend
-  'http://localhost:3000', // Local dev
-];
+
+// --- CORS PATCH: Allow all origins for debugging and Vercel preview deploys ---
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS: ' + origin));
-    }
-  },
+  origin: true, // Reflect request origin
   credentials: true
 }));
 
