@@ -4,9 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+
 
 
 const app = express();
@@ -16,7 +14,11 @@ const app = express();
 
 // --- CORS PATCH: Allow all origins for debugging and Vercel preview deploys ---
 app.use(cors({
-  origin: true, // Reflect request origin
+  origin: [
+    'https://git-trail-kridha.vercel.app', // production frontend
+    'http://localhost:3000',              // local React dev (optional)
+    'http://127.0.0.1:5500'               // local static HTML (your case)
+  ],
   credentials: true
 }));
 
@@ -293,24 +295,9 @@ app.delete('/api/ads/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error', details: err.message });
   }
 });
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '_'));
-  }
-});
-const upload = multer({ storage });
-app.use('/uploads', express.static(uploadDir));
-app.post('/api/upload', upload.array('images', 10), (req, res) => {
-  if (!req.files || !req.files.length) {
-    return res.status(400).json({ error: 'No files uploaded' });
-  }
-  const urls = req.files.map(f => `/uploads/${f.filename}`);
-  res.json({ urls });
-});
+
+// --- S3 Upload Route ---
+const uploadRouter = require('./upload');
+app.use('/api', uploadRouter);
 
 app.listen(3000, () => console.log('Server running on http://localhost:3000'));
