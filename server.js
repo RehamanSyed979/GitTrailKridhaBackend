@@ -263,9 +263,8 @@ app.get('/api/favorites', async (req, res) => {
   res.json(ads);
 });
 
-// --- Image Upload Endpoint (using multer) ---
-// Delete an ad by ID
-// (mongoose is already required at the top, do not require again)
+// --- Image Delete Endpoint (S3 only) ---
+// Delete an ad by ID (does NOT delete from local uploads folder, only from DB and S3 if you add S3 delete logic)
 app.delete('/api/ads/:id', async (req, res) => {
   try {
     const adId = req.params.id;
@@ -274,21 +273,7 @@ app.delete('/api/ads/:id', async (req, res) => {
     }
     const ad = await Ad.findByIdAndDelete(adId);
     if (!ad) return res.status(404).json({ error: 'Ad not found' });
-    // Delete associated images from uploads folder
-    if (ad.images && Array.isArray(ad.images)) {
-      ad.images.forEach(imgPath => {
-        try {
-          // Remove leading slash if present
-          const imgFile = imgPath.startsWith('/uploads/') ? imgPath.slice(1) : imgPath;
-          const fullPath = path.join(__dirname, '../', imgFile);
-          if (fs.existsSync(fullPath)) {
-            fs.unlinkSync(fullPath);
-          }
-        } catch (imgErr) {
-          console.error('Failed to delete image:', imgPath, imgErr);
-        }
-      });
-    }
+    // Optionally: Add S3 delete logic here if you want to remove images from S3
     res.json({ success: true });
   } catch (err) {
     console.error('Error deleting ad:', err);
