@@ -3,6 +3,7 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
 require('dotenv').config();
+console.log('AWS_S3_BUCKET:', process.env.AWS_S3_BUCKET); // DEBUG: Print bucket env var
 
 const router = express.Router();
 
