@@ -200,9 +200,33 @@ app.get('/api/ads', async (req, res) => {
 // Post a new ad (seller only)
 app.post('/api/ads', async (req, res) => {
   try {
-    const { title, description, price, location, images, sellerId } = req.body;
+    // Accept all possible fields from the post ad form, set null if missing
+    const {
+      title, description, price, location, images, sellerId,
+      bhk, bathrooms, furnishing, projectStatus, lister, superBuiltup, carpetArea, maintenance, totalFloors, floorNo, carParking, facing, projectName
+    } = req.body;
     if (!title || !price || !sellerId) return res.status(400).json({ error: 'Missing required fields' });
-    const ad = new Ad({ title, description, price, location, images, seller: sellerId });
+    const ad = new Ad({
+      title,
+      description: description || null,
+      price,
+      location: location || null,
+      images: images || [],
+      seller: sellerId,
+      bhk: bhk !== undefined ? bhk : null,
+      bathrooms: bathrooms !== undefined ? bathrooms : null,
+      furnishing: furnishing !== undefined ? furnishing : null,
+      projectStatus: projectStatus !== undefined ? projectStatus : null,
+      lister: lister !== undefined ? lister : null,
+      superBuiltup: superBuiltup !== undefined ? superBuiltup : null,
+      carpetArea: carpetArea !== undefined ? carpetArea : null,
+      maintenance: maintenance !== undefined ? maintenance : null,
+      totalFloors: totalFloors !== undefined ? totalFloors : null,
+      floorNo: floorNo !== undefined ? floorNo : null,
+      carParking: carParking !== undefined ? carParking : null,
+      facing: facing !== undefined ? facing : null,
+      projectName: projectName !== undefined ? projectName : null
+    });
     await ad.save();
     res.json({ success: true, ad });
   } catch (err) {
